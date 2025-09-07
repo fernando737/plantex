@@ -1,0 +1,12 @@
+# backend/app/core/urls.py
+"""
+URL configuration for core app.
+"""
+
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('health/', views.health_check, name='health-check'),
+    path('info/', views.api_info, name='api-info'),
+]

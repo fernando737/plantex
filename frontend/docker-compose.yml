@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  app-backend:
+    build:
+      context: .
+    env_file:
+      - .env
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./app:/app:delegated
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    command: yarn dev --host 0.0.0.0

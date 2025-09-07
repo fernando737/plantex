@@ -1,0 +1,4 @@
+#Django REST Framework recommends 100 characters per line
+#But Black formatter may exceed this for readability
+[flake8]
+max-line-length = 120
