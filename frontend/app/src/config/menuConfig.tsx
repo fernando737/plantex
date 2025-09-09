@@ -1,6 +1,16 @@
 // src/config/menuConfig.ts
 import React from 'react';
-import { Dashboard, Settings, Help, Person } from '@mui/icons-material';
+import { 
+  Dashboard, 
+  Settings, 
+  Help, 
+  Person,
+  Business,
+  Category,
+  ListAlt,
+  Inventory,
+  Receipt,
+} from '@mui/icons-material';
 
 export interface SubMenuItem {
   text: string;
@@ -19,6 +29,17 @@ export const menuItems: MenuItem[] = [
     icon: <Dashboard />,
     submenu: [
       { text: 'Overview', link: '/dashboard' },
+    ],
+  },
+  {
+    label: 'Textiles',
+    icon: <Category />,
+    submenu: [
+      { text: 'Proveedores', link: '/textile/providers' },
+      { text: 'Insumos', link: '/textile/inputs' },
+      { text: 'BOMs', link: '/textile/boms' },
+      { text: 'Productos', link: '/textile/products' },
+      { text: 'Presupuestos', link: '/textile/budgets' },
     ],
   },
   {

@@ -17,3 +17,7 @@ class TimeStampedModel(models.Model):
 
     class Meta:
         abstract = True
+
+
+# Import textile models so Django can detect them
+from .textile_models import *

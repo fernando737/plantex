@@ -12,6 +12,11 @@ import PrivateRoute from './PrivateRoute';
 import AuthRoutes from './AuthRoutes';
 import useAuthStore from '@/stores/authStore';
 import { Dashboard } from '@/views';
+import Providers from '@/views/Textile/Providers';
+import Inputs from '@/views/Textile/Inputs';
+import BOMs from '@/views/Textile/BOMs';
+import EndProducts from '@/views/Textile/EndProducts';
+import ProductionBudgets from '@/views/Textile/ProductionBudgets';
 
 const AppRoutes: React.FC = () => {
   const isLoggedIn = useAuthStore(state => state.isLoggedIn);
@@ -41,6 +46,11 @@ const AppRoutes: React.FC = () => {
           }
         >
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/textile/providers" element={<Providers />} />
+          <Route path="/textile/inputs" element={<Inputs />} />
+          <Route path="/textile/boms" element={<BOMs />} />
+          <Route path="/textile/products" element={<EndProducts />} />
+          <Route path="/textile/budgets" element={<ProductionBudgets />} />
           <Route path="/profile" element={<div>Profile Page - Coming Soon</div>} />
         </Route>
 

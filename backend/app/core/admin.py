@@ -14,3 +14,6 @@ from django.contrib import admin
 # class YourModelAdmin(admin.ModelAdmin):
 #     list_display = ('field1', 'field2')
 #     search_fields = ('field1',)
+
+# Import textile admin configurations
+from .textile_admin import *

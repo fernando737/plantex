@@ -172,7 +172,7 @@ const handleAuthSuccess = (data: AuthResponse): void => {
 export const logout = (): void => {
   Cookie.remove('access_token');
   Cookie.remove('refresh_token');
-  useAuthStore.setState({ user: null, isLoggedIn: false });
+  useAuthStore.setState({ user: null, isLoggedIn: false, error: null, isLoading: false });
   showSuccess('Cerraste sesión correctamente.');
 };
 

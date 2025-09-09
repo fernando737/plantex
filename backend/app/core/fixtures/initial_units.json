@@ -1,0 +1,35 @@
+[
+  {
+    "model": "core.unit",
+    "pk": 1,
+    "fields": {
+      "name_en": "Units",
+      "name_es": "Unidades", 
+      "abbreviation": "un",
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.unit",
+    "pk": 2,
+    "fields": {
+      "name_en": "Meters",
+      "name_es": "Metros",
+      "abbreviation": "m", 
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.unit",
+    "pk": 3,
+    "fields": {
+      "name_en": "Kilograms",
+      "name_es": "Kilogramos",
+      "abbreviation": "kg",
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  }
+]

@@ -16,9 +16,9 @@ interface AuthStore {
   user: User | null;
   isLoading: boolean;
   error: string | null;
-  logIn: (userData: User) => void;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
+  clearError: () => void;
 }
 
 const useAuthStore = create<AuthStore>()(
@@ -28,33 +28,9 @@ const useAuthStore = create<AuthStore>()(
       user: null,
       isLoading: false,
       error: null,
-      logIn: (userData: User) => set({ isLoggedIn: true, user: userData }),
-      login: async (email: string, password: string) => {
-        set({ isLoading: true, error: null });
-        try {
-          // TODO: Replace with actual API call
-          // For now, simulate API call
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          
-          // Mock successful login
-          if (email && password) {
-            const userData: User = {
-              id: 1,
-              email,
-              name: email.split('@')[0],
-            };
-            set({ isLoggedIn: true, user: userData, isLoading: false });
-          } else {
-            throw new Error('Invalid credentials');
-          }
-        } catch (error) {
-          set({ 
-            error: error instanceof Error ? error.message : 'Login failed',
-            isLoading: false 
-          });
-        }
-      },
-      logout: () => set({ isLoggedIn: false, user: null, error: null }),
+      setLoading: (loading: boolean) => set({ isLoading: loading }),
+      setError: (error: string | null) => set({ error }),
+      clearError: () => set({ error: null }),
     }),
     {
       name: 'auth-storage',

@@ -18,6 +18,9 @@ export DJANGO_SUPERUSER_PASSWORD=1234admin.
 echo "Creating superuser..."
 python manage.py createsuperuser --noinput || echo "Superuser already exists"
 
+echo "Fixtures..."
+python manage.py loaddata initial_units.json
+
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
 

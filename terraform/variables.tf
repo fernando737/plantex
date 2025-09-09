@@ -1,3 +1,8 @@
+variable "project_name" {
+  description = "The project name used for resource naming"
+  default     = "plantex"
+}
+
 variable "region" {
   description = "The AWS region to deploy in"
   default     = "us-east-1"
@@ -21,7 +26,7 @@ variable "volume_size" {
 
 variable "key_name" {
   description = "The name of the SSH key pair to use"
-  default     = "deploy_key_control_legal"
+  default     = "deploy_key_plantex"
 }
 
 variable "vpc_id" {

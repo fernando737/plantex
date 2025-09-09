@@ -12,6 +12,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import useAuthStore from '../stores/authStore';
+import { login } from '../utils/auth';
 
 const schema = yup.object({
   email: yup.string().email('Invalid email').required('Email is required'),
@@ -21,7 +22,7 @@ const schema = yup.object({
 type LoginFormData = yup.InferType<typeof schema>;
 
 const Login: React.FC = () => {
-  const { login, isLoading, error } = useAuthStore();
+  const { isLoading, error, setLoading, setError, clearError } = useAuthStore();
   
   const {
     register,
@@ -32,7 +33,20 @@ const Login: React.FC = () => {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    await login(data.email, data.password);
+    setLoading(true);
+    clearError();
+    
+    try {
+      const result = await login(data.email, data.password);
+      if (result.error) {
+        setError(result.error);
+      }
+      // Success case is handled by handleAuthSuccess in login function
+    } catch (error) {
+      setError('Error de conexión. Por favor, inténtelo de nuevo.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

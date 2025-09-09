@@ -1,4 +1,4 @@
-import './mocks/mockApi';
+// Mock API removed - all requests now go directly to backend
 import { useEffect, useState } from 'react';
 import {
   ThemeProvider,

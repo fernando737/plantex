@@ -11,12 +11,12 @@ data "local_file" "env_file_frontend" {
 }
 
 data "local_file" "private_key" {
-  filename = "${path.module}/deploy_key_control_legal"
+  filename = "${path.module}/deploy_key_plantex"
 }
 
 resource "aws_security_group" "web_sg" {
-  name        = "web-sg"
-  description = "Allow HTTP and SSH traffic"
+  name        = "${var.project_name}-web-sg"
+  description = "Allow HTTP and SSH traffic for ${var.project_name}"
   vpc_id      = var.vpc_id
 
   ingress {
@@ -49,7 +49,8 @@ resource "aws_security_group" "web_sg" {
   }
 
   tags = {
-    Name = "web-sg"
+    Name = "${var.project_name}-web-sg"
+    Project = var.project_name
   }
 }
 
@@ -80,16 +81,18 @@ resource "aws_instance" "web" {
               ssh-keyscan -H github.com >> /home/ubuntu/.ssh/known_hosts
               sudo chown ubuntu:ubuntu /home/ubuntu/.ssh/known_hosts
               cd /home/ubuntu
-              sudo -u ubuntu GIT_SSH_COMMAND="ssh -i /home/ubuntu/.ssh/id_rsa -o StrictHostKeyChecking=no" git clone git@github.com:fernando737/control-legal.git
-              cd control-legal
-              echo "${data.local_file.env_file_backend.content}" > /home/ubuntu/control-legal/backend/.env
+              sudo -u ubuntu GIT_SSH_COMMAND="ssh -i /home/ubuntu/.ssh/id_rsa -o StrictHostKeyChecking=no" git clone git@github.com:fernando737/plantex.git
+              cd plantex
+              echo "${data.local_file.env_file_backend.content}" > /home/ubuntu/plantex/backend/.env
               sudo chown ubuntu:ubuntu ./backend/.env
-              echo "${data.local_file.env_file_frontend.content}" > /home/ubuntu/control-legal/.env
+              echo "${data.local_file.env_file_frontend.content}" > /home/ubuntu/plantex/.env
               sudo chown ubuntu:ubuntu .env
               EOF
 
   tags = {
-    Name = "docker-terraform-ec2"
+    Name = "${var.project_name}-docker-ec2"
+    Project = var.project_name
+    Environment = "production"
   }
 }
 

@@ -45,8 +45,9 @@ HOST = parsed_url.hostname if parsed_url.hostname else ""
 ALLOWED_HOSTS = [
     HOST,
     "localhost",
-    "127.0.0.1",
+    "127.0.0.1", 
     "0.0.0.0",
+    ".localhost",  # Allow all localhost subdomains
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -59,6 +60,7 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https://.*\.yourdomain\.com$",
     r"^https://yourdomain\.com$",
+    r"^http://.*\.localhost:\d+$",  # Allow all localhost subdomains for development
 ]
 
 CORS_ALLOW_METHODS = [
