@@ -36,7 +36,9 @@ SECRET_KEY = get_env_variable(
 DEBUG = get_env_variable("DEBUG", "True").lower() in ("true", "1", "t")
 
 FRONTEND_URL = get_env_variable("FRONTEND_URL", "")
-# Parse the DNS_URL to extract the host
+BASE_DOMAIN = get_env_variable("BASE_DOMAIN", "yourdomain.com")
+
+# Parse the FRONTEND_URL to extract the host
 parsed_url = urlparse(FRONTEND_URL)
 HOST = parsed_url.hostname if parsed_url.hostname else ""
 
@@ -44,6 +46,8 @@ HOST = parsed_url.hostname if parsed_url.hostname else ""
 # CORS Configuration
 ALLOWED_HOSTS = [
     HOST,
+    BASE_DOMAIN,
+    f".{BASE_DOMAIN}",  # Allow all subdomains for production domain
     "localhost",
     "127.0.0.1", 
     "0.0.0.0",
@@ -58,9 +62,9 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"^https://.*\.yourdomain\.com$",
-    r"^https://yourdomain\.com$",
-    r"^http://.*\.localhost:\d+$",  # Allow all localhost subdomains for development
+    rf"^https://.*\.{BASE_DOMAIN.replace('.', r'\.')}$",  # Allow all subdomains for production domain
+    rf"^https://{BASE_DOMAIN.replace('.', r'\.')}$",      # Allow root domain for production
+    r"^http://.*\.localhost:\d+$",                        # Allow all localhost subdomains for development
 ]
 
 CORS_ALLOW_METHODS = [
