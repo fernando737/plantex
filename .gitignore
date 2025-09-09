@@ -197,7 +197,6 @@ staticfiles/
 node_modules/*
 package-lock.json
 yarn.lock
-package.json
 
 # Ignore local dinamic fixtures
 backend/app/fixtures/ProcessOptions_django.json
