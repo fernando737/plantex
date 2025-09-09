@@ -6,7 +6,7 @@ docker-compose -f docker-compose-prod.yml stop frontend nginx
 docker-compose -f docker-compose-prod.yml rm -f frontend nginx
 
 echo "Removing old frontend volume..."
-docker volume rm frontend-dist || true
+docker volume rm plantex_frontend-dist || true
 
 echo "Rebuilding frontend container..."
 docker-compose -f docker-compose-prod.yml build --no-cache frontend
