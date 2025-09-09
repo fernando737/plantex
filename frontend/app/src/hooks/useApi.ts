@@ -16,6 +16,9 @@ console.log('🔍 API Configuration:', {
   VITE_DNS_URL: import.meta.env.VITE_DNS_URL,
   VITE_BACKEND_PREFIX: import.meta.env.VITE_BACKEND_PREFIX,
   baseURL: api.defaults.baseURL,
+  currentDomain: window.location.hostname,
+  currentOrigin: window.location.origin,
+  userAgent: navigator.userAgent,
 });
 
 // Request interceptor to add auth token and CSRF token
@@ -54,6 +57,26 @@ api.interceptors.response.use(
     return response;
   },
   async error => {
+    // Enhanced CORS error debugging
+    if (error.message?.includes('CORS') || error.message?.includes('Network Error') || !error.response) {
+      console.error('🚨 CORS/Network Error Debug Info:', {
+        message: error.message,
+        config: {
+          url: error.config?.url,
+          method: error.config?.method,
+          baseURL: error.config?.baseURL,
+          headers: error.config?.headers,
+        },
+        response: error.response ? {
+          status: error.response.status,
+          statusText: error.response.statusText,
+          headers: error.response.headers,
+        } : 'No response received',
+        currentOrigin: window.location.origin,
+        targetURL: error.config?.baseURL + error.config?.url,
+      });
+    }
+
     const originalRequest = error.config;
 
     // Check if it's a 401 error and we haven't already tried to refresh

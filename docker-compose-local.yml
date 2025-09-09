@@ -9,6 +9,7 @@ services:
       - ./backend/app:/app
       - ./backend:/code # Mount the entire backend directory for live code reloading
     env_file:
+      - ./.env
       - ./backend/.env
     depends_on:
       - db
@@ -28,6 +29,7 @@ services:
     volumes:
       - dev-db-data:/var/lib/postgresql/data
     env_file:
+      - ./.env
       - ./backend/.env
     ports:
       - "5432:5432" # Expose the database port for local access

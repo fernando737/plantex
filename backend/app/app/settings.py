@@ -70,6 +70,18 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^http://.*\.localhost:\d+$",       # Allow all localhost subdomains for development
 ]
 
+# Debug logging for CORS configuration
+print("🔍 CORS Configuration Debug:")
+print(f"  BASE_DOMAIN: {BASE_DOMAIN}")
+print(f"  FRONTEND_URL: {FRONTEND_URL}")
+print(f"  HOST: {HOST}")
+print(f"  DEBUG: {DEBUG}")
+print(f"  ALLOWED_HOSTS: {ALLOWED_HOSTS}")
+print(f"  CORS_ALLOWED_ORIGINS: {CORS_ALLOWED_ORIGINS}")
+print(f"  CORS_ALLOWED_ORIGIN_REGEXES: {CORS_ALLOWED_ORIGIN_REGEXES}")
+print(f"  Escaped domain: {escaped_domain}")
+print("=" * 50)
+
 CORS_ALLOW_METHODS = [
     "GET",
     "POST",
