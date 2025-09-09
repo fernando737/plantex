@@ -61,10 +61,13 @@ CORS_ALLOWED_ORIGINS = [
     "http://0.0.0.0:8000",
 ]
 
+# Create escaped domain for regex patterns
+escaped_domain = BASE_DOMAIN.replace('.', r'\.')
+
 CORS_ALLOWED_ORIGIN_REGEXES = [
-    rf"^https://.*\.{BASE_DOMAIN.replace('.', r'\.')}$",  # Allow all subdomains for production domain
-    rf"^https://{BASE_DOMAIN.replace('.', r'\.')}$",      # Allow root domain for production
-    r"^http://.*\.localhost:\d+$",                        # Allow all localhost subdomains for development
+    f"^https://.*\\.{escaped_domain}$",  # Allow all subdomains for production domain
+    f"^https://{escaped_domain}$",       # Allow root domain for production
+    r"^http://.*\.localhost:\d+$",       # Allow all localhost subdomains for development
 ]
 
 CORS_ALLOW_METHODS = [
