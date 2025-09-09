@@ -204,3 +204,5 @@ backend/app/fixtures/ProcessOptions_django.json
 
 # Ignore local media files
 media/
+
+.env
