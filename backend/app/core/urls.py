@@ -37,12 +37,7 @@ textile_urlpatterns = [
     # End Products
     path('end-products/', views.EndProductViewSet.as_view({'get': 'list', 'post': 'create'}), name='end-product-list'),
     path('end-products/<int:pk>/', views.EndProductViewSet.as_view({'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}), name='end-product-detail'),
-    path('end-products/<int:pk>/recalculate-cost/', views.EndProductViewSet.as_view({'post': 'recalculate_cost'}), name='end-product-recalculate-cost'),
-    path('end-products/recalculate-all-costs/', views.EndProductViewSet.as_view({'post': 'recalculate_all_costs'}), name='end-product-recalculate-all-costs'),
     
-    # Additional Costs
-    path('additional-costs/', views.AdditionalCostViewSet.as_view({'get': 'list', 'post': 'create'}), name='additional-cost-list'),
-    path('additional-costs/<int:pk>/', views.AdditionalCostViewSet.as_view({'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}), name='additional-cost-detail'),
     
     # Production Budgets
     path('production-budgets/', views.ProductionBudgetViewSet.as_view({'get': 'list', 'post': 'create'}), name='production-budget-list'),

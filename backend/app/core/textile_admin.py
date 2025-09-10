@@ -13,7 +13,6 @@ from .textile_models import (
     BOMTemplate,
     BOMItem,
     EndProduct,
-    AdditionalCost,
     ProductionBudget,
     ProductionBudgetItem,
 )
@@ -29,17 +28,21 @@ class UnitAdmin(admin.ModelAdmin):
 
 @admin.register(Provider)
 class ProviderAdmin(admin.ModelAdmin):
-    list_display = ['name', 'provider_type', 'phone_number', 'created_at']
-    list_filter = ['provider_type', 'created_at']
-    search_fields = ['name', 'address', 'phone_number']
+    list_display = ['name', 'phone_number', 'email', 'created_at']
+    list_filter = ['created_at']
+    search_fields = ['name', 'address', 'phone_number', 'email']
     ordering = ['name']
     
     fieldsets = (
         ('Información Básica', {
-            'fields': ('name', 'provider_type')
+            'fields': ('name',)
         }),
         ('Contacto', {
-            'fields': ('phone_number', 'address')
+            'fields': ('phone_number', 'email', 'address')
+        }),
+        ('Notas', {
+            'fields': ('notes',),
+            'classes': ('collapse',)
         }),
     )
 
@@ -61,7 +64,7 @@ class InputAdmin(admin.ModelAdmin):
 @admin.register(InputProvider)
 class InputProviderAdmin(admin.ModelAdmin):
     list_display = ['input', 'provider', 'price_per_unit_cop', 'is_preferred', 'created_at']
-    list_filter = ['is_preferred', 'provider__provider_type', 'input__input_type', 'created_at']
+    list_filter = ['is_preferred', 'input__input_type', 'created_at']
     search_fields = ['input__name', 'provider__name']
     ordering = ['input__name', 'provider__name']
     
@@ -155,11 +158,6 @@ class BOMItemAdmin(admin.ModelAdmin):
         )
 
 
-class AdditionalCostInline(admin.TabularInline):
-    model = AdditionalCost
-    extra = 1
-    fields = ['name', 'value_cop']
-
 
 @admin.register(EndProduct)
 class EndProductAdmin(admin.ModelAdmin):
@@ -167,8 +165,7 @@ class EndProductAdmin(admin.ModelAdmin):
     list_filter = ['bom_template', 'created_at']
     search_fields = ['name', 'description', 'bom_template__name']
     ordering = ['name']
-    readonly_fields = ['bom_cost_cop', 'additional_costs_cop', 'total_cost_cop', 'created_at', 'updated_at']
-    inlines = [AdditionalCostInline]
+    readonly_fields = ['bom_cost_cop', 'total_cost_cop', 'created_at', 'updated_at']
     
     fieldsets = (
         ('Información del Producto', {
@@ -178,7 +175,7 @@ class EndProductAdmin(admin.ModelAdmin):
             'fields': ('produced_quantity',)
         }),
         ('Costos', {
-            'fields': ('bom_cost_cop', 'additional_costs_cop', 'total_cost_cop'),
+            'fields': ('bom_cost_cop', 'total_cost_cop'),
             'classes': ('collapse',)
         }),
         ('Fechas', {
@@ -203,22 +200,6 @@ class EndProductAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('bom_template')
 
-
-@admin.register(AdditionalCost)
-class AdditionalCostAdmin(admin.ModelAdmin):
-    list_display = ['end_product', 'name', 'value_cop', 'created_at']
-    list_filter = ['end_product', 'created_at']
-    search_fields = ['end_product__name', 'name']
-    ordering = ['end_product__name', 'name']
-    
-    fieldsets = (
-        ('Costo Adicional', {
-            'fields': ('end_product', 'name', 'value_cop')
-        }),
-    )
-    
-    def get_queryset(self, request):
-        return super().get_queryset(request).select_related('end_product')
 
 
 class ProductionBudgetItemInline(admin.TabularInline):

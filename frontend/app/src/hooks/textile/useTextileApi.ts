@@ -59,17 +59,13 @@ export const useProductionBudgetItems = () => createTextileEntityHooks<Productio
 
 // Cost recalculation hooks
 export const useBOMCostRecalculation = (id?: number) => {
-  const endpoint = id ? `/textile/bom-templates/${id}/recalculate-cost/` : '/textile/bom-templates/recalculate-cost/';
+  const endpoint = id ? `/textile/bom-templates/${id}/recalculate-cost/` : '/textile/bom-templates/recalculate-all-costs/';
   return useApiPost<CostRecalculationResponse, {}>(endpoint);
 };
 
-export const useEndProductCostRecalculation = (id?: number) => {
-  const endpoint = id ? `/textile/end-products/${id}/recalculate-cost/` : '/textile/end-products/recalculate-cost/';
-  return useApiPost<CostRecalculationResponse, {}>(endpoint);
-};
 
 export const useProductionBudgetCostRecalculation = (id?: number) => {
-  const endpoint = id ? `/textile/production-budgets/${id}/recalculate-cost/` : '/textile/production-budgets/recalculate-cost/';
+  const endpoint = id ? `/textile/production-budgets/${id}/recalculate-cost/` : '/textile/production-budgets/recalculate-all-costs/';
   return useApiPost<CostRecalculationResponse, {}>(endpoint);
 };
 

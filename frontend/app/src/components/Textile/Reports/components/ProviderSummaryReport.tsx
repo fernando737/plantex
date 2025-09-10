@@ -148,7 +148,6 @@ const ProviderSummaryReport: React.FC<ReportComponentProps> = ({
           <thead>
             <tr>
               <th style={headerCellStyles}>Proveedor</th>
-              <th style={headerCellStyles}>Tipo</th>
               <th style={headerCellRightStyles}>Costo Total</th>
               <th style={headerCellRightStyles}>Porcentaje</th>
               <th style={headerCellStyles}>Materiales</th>
@@ -158,11 +157,6 @@ const ProviderSummaryReport: React.FC<ReportComponentProps> = ({
             {data.providers.map((provider: ProviderSummaryItem, index: number) => (
               <tr key={index}>
                 <td style={cellStyles}>{provider.provider_name}</td>
-                <td style={cellStyles}>
-                  <span style={pdfStyles.chipSecondary}>
-                    {provider.provider_type}
-                  </span>
-                </td>
                 <td style={cellBoldStyles}>{formatCOP(provider.total_cost)}</td>
                 <td style={percentageStyles}>{provider.percentage}%</td>
                 <td style={cellStyles}>
@@ -174,7 +168,7 @@ const ProviderSummaryReport: React.FC<ReportComponentProps> = ({
         </table>
 
         <div style={pdfStyles.footer}>
-          <div>Reporte generado por PlantEx - Sistema de Gestión Textil</div>
+          <div>Reporte generado por PlantTextil - Sistema de Gestión Textil</div>
         </div>
       </div>
     );
@@ -193,7 +187,6 @@ const ProviderSummaryReport: React.FC<ReportComponentProps> = ({
           <thead>
             <tr>
               <th style={headerCellStyles}>Proveedor</th>
-              <th style={headerCellStyles}>Tipo</th>
               <th style={headerCellRightStyles}>Costo Total</th>
               <th style={headerCellRightStyles}>Porcentaje</th>
               <th style={headerCellStyles}>Materiales</th>
@@ -203,14 +196,6 @@ const ProviderSummaryReport: React.FC<ReportComponentProps> = ({
             {data.providers.map((provider: ProviderSummaryItem, index: number) => (
               <tr key={index}>
                 <td style={cellStyles}>{provider.provider_name}</td>
-                <td style={cellStyles}>
-                  <Chip
-                    label={provider.provider_type}
-                    size="small"
-                    variant="outlined"
-                    sx={{ fontSize: '0.75rem' }}
-                  />
-                </td>
                 <td style={cellBoldStyles}>{formatCOP(provider.total_cost)}</td>
                 <td style={percentageStyles}>{provider.percentage}%</td>
                 <td style={cellStyles}>

@@ -31,22 +31,12 @@ class Unit(TimeStampedModel):
 
 
 class Provider(TimeStampedModel):
-    """Multi-type providers (Suppliers, Workshops, etc.)"""
-    PROVIDER_TYPES = [
-        ('supplier', 'Proveedor'),
-        ('workshop', 'Taller'),
-        ('other', 'Otro'),
-    ]
+    """Providers for inputs and services"""
     
     name = models.CharField(max_length=200, help_text="Nombre del proveedor")
     email = models.EmailField(blank=True, help_text="Email de contacto")
     phone_number = models.CharField(max_length=20, blank=True, help_text="Número de teléfono")
     address = models.TextField(blank=True, help_text="Dirección completa")
-    provider_type = models.CharField(
-        max_length=20, 
-        choices=PROVIDER_TYPES,
-        help_text="Tipo de proveedor"
-    )
     notes = models.TextField(blank=True, help_text="Notas adicionales")
     
     class Meta:
@@ -55,14 +45,16 @@ class Provider(TimeStampedModel):
         ordering = ['name']
     
     def __str__(self):
-        return f"{self.name} ({self.get_provider_type_display()})"
+        return self.name
 
 
 class Input(TimeStampedModel):
     """Raw Materials and Services"""
     INPUT_TYPES = [
-        ('raw_material', 'Materia Prima'),
-        ('service', 'Servicio'),
+        ('confection', 'Confección'),
+        ('supply', 'Insumo'),
+        ('fabric', 'Telas'),
+        ('process', 'Procesos'),
     ]
     
     name = models.CharField(max_length=200, help_text="Nombre del insumo")
@@ -219,23 +211,11 @@ class EndProduct(TimeStampedModel):
         related_name='end_products',
         help_text="Plantilla BOM asociada"
     )
-    base_cost_cop = models.DecimalField(
-        max_digits=12, 
-        decimal_places=2, 
-        default=0,
-        help_text="Costo base del producto en COP"
-    )
     bom_cost_cop = models.DecimalField(
         max_digits=12, 
         decimal_places=2, 
         default=0,
         help_text="Costo BOM en COP"
-    )
-    additional_costs_cop = models.DecimalField(
-        max_digits=12, 
-        decimal_places=2, 
-        default=0,
-        help_text="Costos adicionales totales en COP"
     )
     total_cost_cop = models.DecimalField(
         max_digits=12, 
@@ -260,48 +240,18 @@ class EndProduct(TimeStampedModel):
         """Get base cost from BOM"""
         return self.bom_template.total_cost_cop
     
-    def calculate_additional_costs_total(self):
-        """Get total of additional costs"""
-        return sum(
-            cost.value_cop for cost in self.additional_costs.all()
-        )
     
     def calculate_total_cost(self):
-        """Get final product cost (BOM + additional costs)"""
-        return self.calculate_bom_cost() + self.calculate_additional_costs_total()
+        """Get final product cost from BOM"""
+        return self.calculate_bom_cost()
     
     def recalculate_cost(self):
         """Calculate and save all cost fields to database"""
         self.bom_cost_cop = self.calculate_bom_cost()
-        self.additional_costs_cop = self.calculate_additional_costs_total()
         self.total_cost_cop = self.calculate_total_cost()
-        self.save(update_fields=['bom_cost_cop', 'additional_costs_cop', 'total_cost_cop', 'updated_at'])
+        self.save(update_fields=['bom_cost_cop', 'total_cost_cop', 'updated_at'])
         return self.total_cost_cop
 
-
-class AdditionalCost(TimeStampedModel):
-    """Custom cost line items for end products"""
-    end_product = models.ForeignKey(
-        EndProduct, 
-        on_delete=models.CASCADE,
-        related_name='additional_costs',
-        help_text="Producto final"
-    )
-    name = models.CharField(max_length=200, help_text="Nombre del costo adicional")
-    value_cop = models.DecimalField(
-        max_digits=12, 
-        decimal_places=2,
-        validators=[MinValueValidator(Decimal('0.01'))],
-        help_text="Valor en COP"
-    )
-    
-    class Meta:
-        verbose_name = "Costo Adicional"
-        verbose_name_plural = "Costos Adicionales"
-        ordering = ['end_product__name', 'name']
-    
-    def __str__(self):
-        return f"{self.end_product.name} - {self.name}: ${self.value_cop:,.2f}"
 
 
 class ProductionBudget(TimeStampedModel):

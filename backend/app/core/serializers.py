@@ -13,7 +13,6 @@ from .textile_models import (
     BOMTemplate,
     BOMItem,
     EndProduct,
-    AdditionalCost,
     ProductionBudget,
     ProductionBudgetItem,
 )
@@ -46,7 +45,6 @@ class ProviderSerializer(serializers.ModelSerializer):
             'email',
             'phone_number',
             'address',
-            'provider_type',
             'notes',
             'created_at',
             'updated_at'
@@ -181,9 +179,7 @@ class EndProductSerializer(serializers.ModelSerializer):
             'name',
             'description',
             'bom_template',  # ID only
-            'base_cost_cop',
             'bom_cost_cop',
-            'additional_costs_cop',
             'total_cost_cop',
             'produced_quantity',
             'created_at',
@@ -192,27 +188,11 @@ class EndProductSerializer(serializers.ModelSerializer):
         read_only_fields = [
             'id', 
             'bom_cost_cop', 
-            'additional_costs_cop', 
             'total_cost_cop', 
             'created_at', 
             'updated_at'
         ]
 
-
-class AdditionalCostSerializer(serializers.ModelSerializer):
-    """Serializer for AdditionalCost model - uses end product ID only"""
-    
-    class Meta:
-        model = AdditionalCost
-        fields = [
-            'id',
-            'end_product',  # ID only
-            'name',
-            'value_cop',
-            'created_at',
-            'updated_at'
-        ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ProductionBudgetSerializer(serializers.ModelSerializer):
@@ -282,29 +262,6 @@ class BOMTemplateDetailSerializer(BOMTemplateSerializer):
     def get_item_count(self, obj):
         return obj.bom_items.count()
 
-
-class EndProductDetailSerializer(EndProductSerializer):
-    """Detailed End Product serializer with additional costs data"""
-    additional_cost_count = serializers.SerializerMethodField()
-    additional_costs_data = serializers.SerializerMethodField()
-    
-    class Meta(EndProductSerializer.Meta):
-        fields = EndProductSerializer.Meta.fields + ['additional_cost_count', 'additional_costs_data']
-    
-    def get_additional_cost_count(self, obj):
-        return obj.additional_costs.count()
-    
-    def get_additional_costs_data(self, obj):
-        """Return the actual additional costs data for editing"""
-        return [
-            {
-                'id': cost.id,
-                'name': cost.name,
-                'value_cop': str(cost.value_cop),
-                'isNew': False
-            }
-            for cost in obj.additional_costs.all()
-        ]
 
 
 class ProductionBudgetDetailSerializer(ProductionBudgetSerializer):

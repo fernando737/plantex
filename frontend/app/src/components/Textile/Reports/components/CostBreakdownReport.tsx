@@ -78,10 +78,8 @@ const CostBreakdownReport: React.FC<ReportComponentProps> = ({
               <th style={headerCellStyles}>Producto</th>
               <th style={headerCellRightStyles}>Cantidad</th>
               <th style={headerCellRightStyles}>Costo Unitario</th>
+              <th style={headerCellRightStyles}>Costo BOM</th>
               <th style={headerCellRightStyles}>Costo Total</th>
-              <th style={headerCellRightStyles}>Base</th>
-              <th style={headerCellRightStyles}>BOM</th>
-              <th style={headerCellRightStyles}>Adicionales</th>
             </tr>
           </thead>
           <tbody>
@@ -90,17 +88,15 @@ const CostBreakdownReport: React.FC<ReportComponentProps> = ({
                 <td style={cellStyles}>{item.product_name}</td>
                 <td style={cellRightStyles}>{item.planned_quantity}</td>
                 <td style={cellRightStyles}>{formatCOP(item.unit_cost_cop)}</td>
-                <td style={cellBoldStyles}>{formatCOP(item.total_cost_cop)}</td>
-                <td style={cellRightStyles}>{formatCOP(item.base_cost_cop)}</td>
                 <td style={cellRightStyles}>{formatCOP(item.bom_cost_cop)}</td>
-                <td style={cellRightStyles}>{formatCOP(item.additional_costs_cop)}</td>
+                <td style={cellBoldStyles}>{formatCOP(item.total_cost_cop)}</td>
               </tr>
             ))}
           </tbody>
         </table>
 
         <div style={pdfStyles.footer}>
-          <div>Reporte generado por PlantEx - Sistema de Gestión Textil</div>
+          <div>Reporte generado por PlantTextil - Sistema de Gestión Textil</div>
         </div>
       </div>
     );
@@ -121,10 +117,8 @@ const CostBreakdownReport: React.FC<ReportComponentProps> = ({
               <th style={headerCellStyles}>Producto</th>
               <th style={headerCellRightStyles}>Cantidad</th>
               <th style={headerCellRightStyles}>Costo Unitario</th>
+              <th style={headerCellRightStyles}>Costo BOM</th>
               <th style={headerCellRightStyles}>Costo Total</th>
-              <th style={headerCellRightStyles}>Base</th>
-              <th style={headerCellRightStyles}>BOM</th>
-              <th style={headerCellRightStyles}>Adicionales</th>
             </tr>
           </thead>
           <tbody>
@@ -133,10 +127,8 @@ const CostBreakdownReport: React.FC<ReportComponentProps> = ({
                 <td style={cellStyles}>{item.product_name}</td>
                 <td style={cellRightStyles}>{item.planned_quantity}</td>
                 <td style={cellRightStyles}>{formatCOP(item.unit_cost_cop)}</td>
-                <td style={cellBoldStyles}>{formatCOP(item.total_cost_cop)}</td>
-                <td style={cellRightStyles}>{formatCOP(item.base_cost_cop)}</td>
                 <td style={cellRightStyles}>{formatCOP(item.bom_cost_cop)}</td>
-                <td style={cellRightStyles}>{formatCOP(item.additional_costs_cop)}</td>
+                <td style={cellBoldStyles}>{formatCOP(item.total_cost_cop)}</td>
               </tr>
             ))}
           </tbody>

@@ -18,7 +18,6 @@ from .textile_models import (
     BOMTemplate,
     BOMItem,
     EndProduct,
-    AdditionalCost,
     ProductionBudget,
     ProductionBudgetItem,
 )
@@ -31,8 +30,6 @@ from .serializers import (
     BOMTemplateDetailSerializer,
     BOMItemSerializer,
     EndProductSerializer,
-    EndProductDetailSerializer,
-    AdditionalCostSerializer,
     ProductionBudgetSerializer,
     ProductionBudgetDetailSerializer,
     ProductionBudgetItemSerializer,
@@ -77,11 +74,7 @@ class ProviderViewSet(viewsets.ModelViewSet):
     serializer_class = ProviderSerializer
     
     def get_queryset(self):
-        queryset = Provider.objects.all()
-        provider_type = self.request.query_params.get('provider_type', None)
-        if provider_type is not None:
-            queryset = queryset.filter(provider_type=provider_type)
-        return queryset
+        return Provider.objects.all()
 
 
 class InputViewSet(viewsets.ModelViewSet):
@@ -238,149 +231,22 @@ class EndProductViewSet(viewsets.ModelViewSet):
     """ViewSet for EndProduct model with cost recalculation"""
     queryset = EndProduct.objects.select_related('bom_template').all()
     
-    def get_serializer_class(self):
-        if self.action == 'retrieve':
-            return EndProductDetailSerializer
-        return EndProductSerializer
+    serializer_class = EndProductSerializer
     
-    @action(detail=True, methods=['post'])
-    def recalculate_cost(self, request, pk=None):
-        """Recalculate cost for a specific end product"""
-        try:
-            end_product = self.get_object()
-            new_cost = end_product.recalculate_cost()
-            
-            response_data = {
-                'success': True,
-                'message': f'Costo del producto "{end_product.name}" recalculado exitosamente.',
-                'new_cost': new_cost,
-                'timestamp': timezone.now().isoformat(),
-            }
-            
-            return Response(response_data, status=status.HTTP_200_OK)
-            
-        except Exception as e:
-            return ErrorResponseBuilder.exception_error(
-                e,
-                context="recalcular costo de producto final",
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-    
-    @action(detail=False, methods=['post'])
-    def recalculate_all_costs(self, request):
-        """Recalculate costs for all end products"""
-        try:
-            updated_count = 0
-            
-            for end_product in EndProduct.objects.all():
-                end_product.recalculate_cost()
-                updated_count += 1
-            
-            response_data = {
-                'success': True,
-                'message': f'Costos de {updated_count} productos finales recalculados exitosamente.',
-                'updated_count': updated_count,
-                'timestamp': timezone.now().isoformat(),
-            }
-            
-            return Response(response_data, status=status.HTTP_200_OK)
-            
-        except Exception as e:
-            return ErrorResponseBuilder.exception_error(
-                e,
-                context="recalcular todos los costos de productos finales",
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
 
     def perform_create(self, serializer):
         """Automatically recalculate costs after creating end product"""
-        # Extract additional costs from request data before saving
-        additional_costs_data = self.request.data.get('additional_costs', [])
-        
         end_product = serializer.save()
-        
-        # Create additional costs if provided
-        self._create_additional_costs(end_product, additional_costs_data)
-        
         # Recalculate all costs
         end_product.recalculate_cost()
 
     def perform_update(self, serializer):
         """Automatically recalculate costs after updating end product"""
-        # Extract additional costs from request data before saving
-        additional_costs_data = self.request.data.get('additional_costs', [])
-        
         end_product = serializer.save()
-        
-        # Update additional costs if provided
-        self._update_additional_costs(end_product, additional_costs_data)
-        
         # Recalculate all costs
         end_product.recalculate_cost()
     
-    def _create_additional_costs(self, end_product, additional_costs_data):
-        """Helper method to create additional costs for a new end product"""
-        from .textile_models import AdditionalCost
-        
-        for cost_data in additional_costs_data:
-            if cost_data.get('name') and cost_data.get('value_cop'):
-                AdditionalCost.objects.create(
-                    end_product=end_product,
-                    name=cost_data['name'],
-                    value_cop=cost_data['value_cop']
-                )
-    
-    def _update_additional_costs(self, end_product, additional_costs_data):
-        """Helper method to update additional costs for an existing end product"""
-        from .textile_models import AdditionalCost
-        
-        # Get existing additional costs
-        existing_costs = {cost.id: cost for cost in end_product.additional_costs.all()}
-        updated_cost_ids = set()
-        
-        # Process each cost in the form data
-        for cost_data in additional_costs_data:
-            if not cost_data.get('name') or not cost_data.get('value_cop'):
-                continue
-                
-            cost_id = cost_data.get('id')
-            
-            if cost_id and not cost_data.get('isNew', False):
-                # Update existing cost
-                if cost_id in existing_costs:
-                    existing_cost = existing_costs[cost_id]
-                    existing_cost.name = cost_data['name']
-                    existing_cost.value_cop = cost_data['value_cop']
-                    existing_cost.save()
-                    updated_cost_ids.add(cost_id)
-            else:
-                # Create new cost
-                AdditionalCost.objects.create(
-                    end_product=end_product,
-                    name=cost_data['name'],
-                    value_cop=cost_data['value_cop']
-                )
-        
-        # Delete costs that were removed from the form
-        costs_to_delete = set(existing_costs.keys()) - updated_cost_ids
-        if costs_to_delete:
-            AdditionalCost.objects.filter(id__in=costs_to_delete).delete()
 
-
-class AdditionalCostViewSet(viewsets.ModelViewSet):
-    """ViewSet for AdditionalCost model"""
-    queryset = AdditionalCost.objects.select_related('end_product').all()
-    serializer_class = AdditionalCostSerializer
-    
-    def get_queryset(self):
-        queryset = AdditionalCost.objects.select_related('end_product').all()
-        
-        # Filter by end product
-        end_product_id = self.request.query_params.get('end_product', None)
-        if end_product_id is not None:
-            queryset = queryset.filter(end_product=end_product_id)
-        
-        return queryset
 
 
 class ProductionBudgetViewSet(viewsets.ModelViewSet):
@@ -488,9 +354,7 @@ class ProductionBudgetViewSet(viewsets.ModelViewSet):
                     "planned_quantity": item.planned_quantity,
                     "unit_cost_cop": str(item.unit_cost_cop),
                     "total_cost_cop": str(item.total_cost_cop),
-                    "base_cost_cop": str(item.end_product.base_cost_cop),
-                    "bom_cost_cop": str(item.end_product.bom_cost_cop),
-                    "additional_costs_cop": str(item.end_product.additional_costs_cop)
+                    "bom_cost_cop": str(item.end_product.bom_cost_cop)
                 }
                 report_data["items"].append(item_data)
             
@@ -525,12 +389,11 @@ class ProductionBudgetViewSet(viewsets.ModelViewSet):
                     bom_items = end_product.bom_template.bom_items.all()
                     for bom_item in bom_items:
                         provider = bom_item.input_provider.provider
-                        provider_key = f"{provider.name}_{provider.provider_type}"
+                        provider_key = provider.name
                         
                         if provider_key not in provider_costs:
                             provider_costs[provider_key] = {
                                 "provider_name": provider.name,
-                                "provider_type": provider.get_provider_type_display(),
                                 "total_cost": 0,
                                 "materials": set()
                             }
@@ -546,7 +409,6 @@ class ProductionBudgetViewSet(viewsets.ModelViewSet):
                 percentage = (provider_data["total_cost"] / total_budget * 100) if total_budget > 0 else 0
                 providers_list.append({
                     "provider_name": provider_data["provider_name"],
-                    "provider_type": provider_data["provider_type"],
                     "total_cost": f"{provider_data['total_cost']:.2f}",
                     "percentage": round(percentage, 1),
                     "materials": list(provider_data["materials"])
@@ -583,8 +445,7 @@ class ProductionBudgetViewSet(viewsets.ModelViewSet):
             ).prefetch_related(
                 'end_product__bom_template__bom_items__input',
                 'end_product__bom_template__bom_items__input__unit',
-                'end_product__bom_template__bom_items__input_provider__provider',
-                'end_product__additional_costs'
+                'end_product__bom_template__bom_items__input_provider__provider'
             ).filter(production_budget=production_budget)
             
             # Build detailed report data
@@ -598,9 +459,6 @@ class ProductionBudgetViewSet(viewsets.ModelViewSet):
             
             for item in budget_items:
                 end_product = item.end_product
-                
-                # Base cost calculation
-                base_cost_total = float(end_product.base_cost_cop) * item.planned_quantity
                 
                 # BOM items detail
                 bom_items = []
@@ -622,35 +480,16 @@ class ProductionBudgetViewSet(viewsets.ModelViewSet):
                             "total_for_quantity": f"{total_for_quantity:.2f}"
                         })
                 
-                # Additional costs detail
-                additional_costs = []
-                additional_total = 0
-                
-                for additional_cost in end_product.additional_costs.all():
-                    total_for_quantity = float(additional_cost.value_cop) * item.planned_quantity
-                    additional_total += total_for_quantity
-                    
-                    additional_costs.append({
-                        "name": additional_cost.name,
-                        "unit_cost_cop": str(additional_cost.value_cop),
-                        "total_for_quantity": f"{total_for_quantity:.2f}"
-                    })
-                
                 # Product totals
-                product_total = base_cost_total + bom_total + additional_total
+                product_total = bom_total
                 unit_cost = product_total / item.planned_quantity if item.planned_quantity > 0 else 0
                 
                 product_data = {
                     "product_name": end_product.name,
                     "planned_quantity": item.planned_quantity,
-                    "base_cost_cop": str(end_product.base_cost_cop),
-                    "base_cost_total": f"{base_cost_total:.2f}",
                     "bom_items": bom_items,
-                    "additional_costs": additional_costs,
                     "totals": {
-                        "base_total": f"{base_cost_total:.2f}",
                         "bom_total": f"{bom_total:.2f}",
-                        "additional_total": f"{additional_total:.2f}",
                         "product_total": f"{product_total:.2f}",
                         "unit_cost": f"{unit_cost:.2f}"
                     }

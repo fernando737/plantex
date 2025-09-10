@@ -8,11 +8,6 @@ import {
   Button,
   Grid,
   Typography,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Select,
-  FormHelperText,
 } from '@mui/material';
 import { designTokens } from '@/config';
 import { ProviderFormData } from '@/types/textile';
@@ -22,15 +17,9 @@ const validationSchema = yup.object({
   email: yup.string().email('Email inválido').optional(),
   phone_number: yup.string().max(20, 'Máximo 20 caracteres').optional(),
   address: yup.string().max(500, 'Máximo 500 caracteres').optional(),
-  provider_type: yup.string().oneOf(['supplier', 'workshop', 'other'], 'Seleccione un tipo válido').required('El tipo de proveedor es obligatorio'),
   notes: yup.string().max(1000, 'Máximo 1000 caracteres').optional(),
 });
 
-const providerTypeOptions = [
-  { value: 'supplier', label: 'Proveedor' },
-  { value: 'workshop', label: 'Taller' },
-  { value: 'other', label: 'Otro' },
-];
 
 interface ProviderFormProps {
   initialData?: Partial<ProviderFormData>;
@@ -56,7 +45,6 @@ const ProviderForm: React.FC<ProviderFormProps> = ({
       email: initialData?.email || '',
       phone_number: initialData?.phone_number || '',
       address: initialData?.address || '',
-      provider_type: initialData?.provider_type || 'supplier',
       notes: initialData?.notes || '',
     },
   });
@@ -172,33 +160,6 @@ const ProviderForm: React.FC<ProviderFormProps> = ({
           />
         </Grid>
 
-        <Grid item xs={12}>
-          <Controller
-            name="provider_type"
-            control={control}
-            render={({ field }) => (
-              <FormControl fullWidth error={!!errors.provider_type} disabled={loading}>
-                <InputLabel>Tipo de Proveedor *</InputLabel>
-                <Select
-                  {...field}
-                  label="Tipo de Proveedor *"
-                  sx={{
-                    borderRadius: designTokens.borderRadius.sm,
-                  }}
-                >
-                  {providerTypeOptions.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-                {errors.provider_type && (
-                  <FormHelperText>{errors.provider_type.message}</FormHelperText>
-                )}
-              </FormControl>
-            )}
-          />
-        </Grid>
 
         <Grid item xs={12}>
           <Controller

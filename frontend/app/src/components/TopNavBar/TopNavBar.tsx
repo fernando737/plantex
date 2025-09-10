@@ -90,7 +90,7 @@ const TopNavBar: React.FC = () => {
           variant="h6"
           sx={{ flexGrow: 1, fontWeight: 700, textAlign: 'center' }}
         >
-          AppName
+          PlanTextil
         </Typography>
         {/* Center: Search */}
         <Box sx={{ flexGrow: 2, display: 'flex', justifyContent: 'center' }}>

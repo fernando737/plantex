@@ -21,13 +21,15 @@ import { useUnits } from '@/hooks/textile/useTextileApi';
 const validationSchema = yup.object({
   name: yup.string().required('El nombre es obligatorio').max(100, 'Máximo 100 caracteres'),
   description: yup.string().max(500, 'Máximo 500 caracteres').optional(),
-  input_type: yup.string().oneOf(['raw_material', 'service'], 'Seleccione un tipo válido').required('El tipo de insumo es obligatorio'),
+  input_type: yup.string().oneOf(['confection', 'supply', 'fabric', 'process'], 'Seleccione un tipo válido').required('El tipo de insumo es obligatorio'),
   unit: yup.number().required('La unidad es obligatoria').positive('Debe seleccionar una unidad válida'),
 });
 
 const inputTypeOptions = [
-  { value: 'raw_material', label: 'Materia Prima' },
-  { value: 'service', label: 'Servicio' },
+  { value: 'confection', label: 'Confección' },
+  { value: 'supply', label: 'Insumo' },
+  { value: 'fabric', label: 'Telas' },
+  { value: 'process', label: 'Procesos' },
 ];
 
 interface InputFormProps {
@@ -56,7 +58,7 @@ const InputForm: React.FC<InputFormProps> = ({
     defaultValues: {
       name: initialData?.name || '',
       description: initialData?.description || '',
-      input_type: initialData?.input_type || 'raw_material',
+      input_type: initialData?.input_type || 'supply',
       unit: initialData?.unit || 0,
     },
   });

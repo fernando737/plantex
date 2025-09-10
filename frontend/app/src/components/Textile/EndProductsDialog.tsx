@@ -23,13 +23,11 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Add as AddIcon,
-  AttachMoney as AttachMoneyIcon,
   Calculate as CalculateIcon,
 } from '@mui/icons-material';
 import { EndProduct, BOMTemplate } from '@/types/textile';
 import { formatCOP } from '@/utils/currency';
 import { designTokens } from '@/config';
-import AdditionalCostsManagement from './AdditionalCostsManagement';
 
 interface EndProductsDialogProps {
   open: boolean;
@@ -54,16 +52,10 @@ const EndProductsDialog: React.FC<EndProductsDialogProps> = ({
   onRecalculateAllCosts,
   isRecalculating = false,
 }) => {
-  const [selectedEndProduct, setSelectedEndProduct] = useState<EndProduct | null>(null);
-
   const getBOMTemplateName = (bomTemplateId?: number) => {
     if (!bomTemplateId) return '-';
     const template = bomTemplates.find(t => t.id === bomTemplateId);
     return template?.name || 'BOM no encontrada';
-  };
-
-  const handleCloseAdditionalCosts = () => {
-    setSelectedEndProduct(null);
   };
 
   return (
@@ -133,17 +125,7 @@ const EndProductsDialog: React.FC<EndProductsDialogProps> = ({
                     </TableCell>
                     <TableCell align="right" sx={{ minWidth: 120 }}>
                       <Typography variant="subtitle2" fontWeight="bold">
-                        Costo Base
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="right" sx={{ minWidth: 120 }}>
-                      <Typography variant="subtitle2" fontWeight="bold">
                         Costo BOM
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="right" sx={{ minWidth: 120 }}>
-                      <Typography variant="subtitle2" fontWeight="bold">
-                        Costos Adicionales
                       </Typography>
                     </TableCell>
                     <TableCell align="right" sx={{ minWidth: 120 }}>
@@ -199,18 +181,8 @@ const EndProductsDialog: React.FC<EndProductsDialogProps> = ({
                         )}
                       </TableCell>
                       <TableCell align="right">
-                        <Typography variant="body2" color="primary.main" fontWeight="medium">
-                          {formatCOP(endProduct.base_cost_cop)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="right">
                         <Typography variant="body2" color="secondary.main" fontWeight="medium">
                           {formatCOP(endProduct.bom_cost_cop)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="right">
-                        <Typography variant="body2" color="warning.main" fontWeight="medium">
-                          {formatCOP(endProduct.additional_costs_cop)}
                         </Typography>
                       </TableCell>
                       <TableCell align="right">
@@ -233,15 +205,6 @@ const EndProductsDialog: React.FC<EndProductsDialogProps> = ({
                               <EditIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>
-                          <Tooltip title="Gestionar costos adicionales">
-                            <IconButton
-                              onClick={() => setSelectedEndProduct(endProduct)}
-                              size="small"
-                              sx={{ color: designTokens.colors.warning.main }}
-                            >
-                              <AttachMoneyIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
                           <Tooltip title="Eliminar producto">
                             <IconButton
                               onClick={() => onDeleteEndProduct(endProduct)}
@@ -257,7 +220,7 @@ const EndProductsDialog: React.FC<EndProductsDialogProps> = ({
                   ))}
                   {endProducts.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+                      <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
                         <Typography variant="body2" color="text.secondary">
                           No hay productos finales registrados
                         </Typography>
@@ -277,44 +240,6 @@ const EndProductsDialog: React.FC<EndProductsDialogProps> = ({
         </DialogActions>
       </Dialog>
 
-      {/* Additional Costs Management Dialog */}
-      {selectedEndProduct && (
-        <Dialog
-          open={true}
-          onClose={handleCloseAdditionalCosts}
-          maxWidth="md"
-          fullWidth
-          PaperProps={{
-            sx: {
-              height: '80vh',
-              maxHeight: '80vh',
-            },
-          }}
-        >
-          <DialogTitle>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant="h6" component="div">
-                Costos Adicionales - {selectedEndProduct.name}
-              </Typography>
-              <IconButton onClick={handleCloseAdditionalCosts} size="small">
-                <CloseIcon />
-              </IconButton>
-            </Box>
-          </DialogTitle>
-          <DialogContent sx={{ p: 0 }}>
-            <AdditionalCostsManagement 
-              endProduct={selectedEndProduct}
-              onAddAdditionalCost={() => {}}
-              onEditAdditionalCost={() => {}}
-            />
-          </DialogContent>
-          <DialogActions sx={{ p: 2 }}>
-            <Button onClick={handleCloseAdditionalCosts} variant="outlined">
-              Cerrar
-            </Button>
-          </DialogActions>
-        </Dialog>
-      )}
     </>
   );
 };

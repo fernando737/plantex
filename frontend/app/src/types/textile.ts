@@ -13,7 +13,6 @@ export interface Provider {
   email?: string;
   phone_number?: string;
   address?: string;
-  provider_type: 'supplier' | 'workshop' | 'other';
   notes?: string;
   created_at: string;
   updated_at: string;
@@ -23,7 +22,7 @@ export interface Input {
   id: number;
   name: string;
   description?: string;
-  input_type: 'raw_material' | 'service';
+  input_type: 'confection' | 'supply' | 'fabric' | 'process';
   unit: number;
   created_at: string;
   updated_at: string;
@@ -65,31 +64,13 @@ export interface EndProduct {
   name: string;
   description?: string;
   bom_template?: number;
-  base_cost_cop: string;
   bom_cost_cop: string;
-  additional_costs_cop: string;
   total_cost_cop: string;
   produced_quantity: number;
   created_at: string;
   updated_at: string;
-  // From detail serializer
-  additional_cost_count?: number;
-  additional_costs_data?: {
-    id: number;
-    name: string;
-    value_cop: string;
-    isNew?: boolean;
-  }[];
 }
 
-export interface AdditionalCost {
-  id: number;
-  end_product: number;
-  name: string;
-  cost: string;
-  created_at: string;
-  updated_at: string;
-}
 
 export interface ProductionBudget {
   id: number;
@@ -132,7 +113,6 @@ export interface BOMTemplateWithItems extends BOMTemplate {
 
 export interface EndProductWithRelations extends EndProduct {
   bom_template_data?: BOMTemplate;
-  additional_costs: AdditionalCost[];
 }
 
 export interface ProductionBudgetItemWithRelations extends ProductionBudgetItem {
@@ -155,14 +135,13 @@ export interface ProviderFormData {
   email?: string;
   phone_number?: string;
   address?: string;
-  provider_type: 'supplier' | 'workshop' | 'other';
   notes?: string;
 }
 
 export interface InputFormData {
   name: string;
   description?: string;
-  input_type: 'raw_material' | 'service';
+  input_type: 'confection' | 'supply' | 'fabric' | 'process';
   unit: number;
 }
 
@@ -190,20 +169,8 @@ export interface EndProductFormData {
   name: string;
   description?: string;
   bom_template?: number;
-  base_cost_cop: string;
-  additional_costs?: {
-    id?: number;
-    name: string;
-    value_cop: string;
-    isNew?: boolean;
-  }[];
 }
 
-export interface AdditionalCostFormData {
-  end_product: number;
-  name: string;
-  cost: string;
-}
 
 export interface ProductionBudgetFormData {
   name: string;

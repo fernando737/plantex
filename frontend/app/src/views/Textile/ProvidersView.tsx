@@ -95,18 +95,6 @@ const ProvidersView: React.FC<ProvidersViewProps> = ({
       },
     },
     {
-      id: 'provider_type',
-      label: 'Tipo',
-      render: (provider: Provider) => {
-        const typeLabels = {
-          supplier: 'Proveedor',
-          workshop: 'Taller',
-          other: 'Otro'
-        };
-        return typeLabels[provider.provider_type] || provider.provider_type;
-      },
-    },
-    {
       id: 'actions',
       label: 'Acciones',
       align: 'center' as const,

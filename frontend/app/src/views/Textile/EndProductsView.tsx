@@ -13,9 +13,8 @@ import {
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  Calculate as CalculateIcon,
 } from '@mui/icons-material';
-import { useEndProducts, useBOMTemplates, useEndProductCostRecalculation } from '@/hooks/textile/useTextileApi';
+import { useEndProducts, useBOMTemplates } from '@/hooks/textile/useTextileApi';
 import { EndProduct, BOMTemplate } from '@/types/textile';
 import DataTableSimple from '@/components/Common/DataTableSimple';
 import ConfirmationDialog from '@/components/Common/ConfirmationDialog';
@@ -37,7 +36,6 @@ const EndProductsView: React.FC<EndProductsViewProps> = ({
   
   const endProductHooks = useEndProducts();
   const bomTemplateHooks = useBOMTemplates();
-  const costRecalculation = useEndProductCostRecalculation();
   
   const { data: endProductsResponse, isLoading } = endProductHooks.useList();
   const { data: bomTemplatesResponse } = bomTemplateHooks.useList();
@@ -76,15 +74,6 @@ const EndProductsView: React.FC<EndProductsViewProps> = ({
     setEndProductToDelete(null);
   };
 
-  const handleRecalculateAllCosts = async () => {
-    try {
-      const result = await costRecalculation.mutateAsync({});
-      toast.success(`Costos recalculados para todos los productos: ${result.updated_count} actualizados`);
-    } catch (error) {
-      toast.error('Error al recalcular los costos');
-      console.error('Cost recalculation error:', error);
-    }
-  };
 
   const getBOMTemplateName = (bomTemplateId?: number) => {
     if (!bomTemplateId) return '-';
@@ -131,19 +120,9 @@ const EndProductsView: React.FC<EndProductsViewProps> = ({
       ),
     },
     {
-      id: 'base_cost',
-      label: 'Costo Base',
-      render: (endProduct: EndProduct) => formatCOP(endProduct.base_cost_cop),
-    },
-    {
       id: 'bom_cost',
       label: 'Costo BOM',
       render: (endProduct: EndProduct) => formatCOP(endProduct.bom_cost_cop),
-    },
-    {
-      id: 'additional_costs',
-      label: 'Costos Adicionales',
-      render: (endProduct: EndProduct) => formatCOP(endProduct.additional_costs_cop),
     },
     {
       id: 'total_cost',
@@ -191,18 +170,6 @@ const EndProductsView: React.FC<EndProductsViewProps> = ({
             Productos Finales
           </Typography>
           <Box sx={{ display: 'flex', gap: 2 }}>
-            <Tooltip title="Recalcular todos los costos">
-              <IconButton
-                onClick={handleRecalculateAllCosts}
-                disabled={costRecalculation.isPending}
-                sx={{ 
-                  color: designTokens.colors.info.main,
-                  '&:hover': { backgroundColor: designTokens.colors.info.light + '20' }
-                }}
-              >
-                <CalculateIcon />
-              </IconButton>
-            </Tooltip>
             {onCreateEndProduct && (
               <Button
                 variant="contained"

@@ -187,9 +187,9 @@ export const generateDetailedLineItemsPDF = async (
 export const generateCostBreakdownCSV = (data: ReportData): string => {
   if (!data.items) return '';
   
-  let csvContent = 'Presupuesto,Producto,Cantidad Planificada,Costo Unitario,Costo Total,Costo Base,Costo BOM,Costos Adicionales\n';
+  let csvContent = 'Presupuesto,Producto,Cantidad Planificada,Costo Unitario,Costo BOM,Costo Total\n';
   data.items.forEach((item) => {
-    csvContent += `"${data.budget.name}","${item.product_name}",${item.planned_quantity},"${item.unit_cost_cop}","${item.total_cost_cop}","${item.base_cost_cop}","${item.bom_cost_cop}","${item.additional_costs_cop}"\n`;
+    csvContent += `"${data.budget.name}","${item.product_name}",${item.planned_quantity},"${item.unit_cost_cop}","${item.bom_cost_cop}","${item.total_cost_cop}"\n`;
   });
   
   return csvContent;
@@ -198,10 +198,10 @@ export const generateCostBreakdownCSV = (data: ReportData): string => {
 export const generateProviderSummaryCSV = (data: ReportData): string => {
   if (!data.providers) return '';
   
-  let csvContent = 'Presupuesto,Proveedor,Tipo de Proveedor,Costo Total,Porcentaje,Materiales\n';
+  let csvContent = 'Presupuesto,Proveedor,Costo Total,Porcentaje,Materiales\n';
   data.providers.forEach((provider) => {
     const materials = provider.materials.join('; ');
-    csvContent += `"${data.budget.name}","${provider.provider_name}","${provider.provider_type}","${provider.total_cost}",${provider.percentage},"${materials}"\n`;
+    csvContent += `"${data.budget.name}","${provider.provider_name}","${provider.total_cost}",${provider.percentage},"${materials}"\n`;
   });
   
   return csvContent;
@@ -210,20 +210,12 @@ export const generateProviderSummaryCSV = (data: ReportData): string => {
 export const generateDetailedLineItemsCSV = (data: ReportData): string => {
   if (!data.products) return '';
   
-  let csvContent = 'Presupuesto,Producto,Tipo de Costo,Componente,Proveedor,Cantidad,Unidad,Precio Unitario,Costo Línea,Cant. Producto,Total para Presupuesto\n';
+  let csvContent = 'Presupuesto,Producto,Componente,Proveedor,Cantidad,Unidad,Precio Unitario,Costo Línea,Cant. Producto,Total para Presupuesto\n';
   
   data.products.forEach((product) => {
-    // Base cost
-    csvContent += `"${data.budget.name}","${product.product_name}","Costo Base","Costo Base","N/A","1","unidad","${product.base_cost_cop}","${product.base_cost_cop}",${product.planned_quantity},"${product.base_cost_total}"\n`;
-    
     // BOM items
     product.bom_items?.forEach((item) => {
-      csvContent += `"${data.budget.name}","${product.product_name}","BOM","${item.input_name}","${item.provider_name}","${item.quantity}","${item.unit}","${item.unit_price_cop}","${item.line_cost_cop}",${product.planned_quantity},"${item.total_for_quantity}"\n`;
-    });
-    
-    // Additional costs
-    product.additional_costs?.forEach((cost) => {
-      csvContent += `"${data.budget.name}","${product.product_name}","Adicional","${cost.name}","N/A","1","unidad","${cost.unit_cost_cop}","${cost.unit_cost_cop}",${product.planned_quantity},"${cost.total_for_quantity}"\n`;
+      csvContent += `"${data.budget.name}","${product.product_name}","${item.input_name}","${item.provider_name}","${item.quantity}","${item.unit}","${item.unit_price_cop}","${item.line_cost_cop}",${product.planned_quantity},"${item.total_for_quantity}"\n`;
     });
   });
   

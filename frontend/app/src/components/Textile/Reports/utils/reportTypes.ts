@@ -11,14 +11,11 @@ export interface CostBreakdownItem {
   planned_quantity: number;
   unit_cost_cop: string;
   total_cost_cop: string;
-  base_cost_cop: string;
   bom_cost_cop: string;
-  additional_costs_cop: string;
 }
 
 export interface ProviderSummaryItem {
   provider_name: string;
-  provider_type: string;
   total_cost: string;
   percentage: number;
   materials: string[];
@@ -35,16 +32,9 @@ export interface BOMItem {
   total_for_quantity: string;
 }
 
-export interface AdditionalCost {
-  name: string;
-  unit_cost_cop: string;
-  total_for_quantity: string;
-}
 
 export interface ProductTotals {
-  base_total: string;
   bom_total: string;
-  additional_total: string;
   product_total: string;
   unit_cost: string;
 }
@@ -52,10 +42,7 @@ export interface ProductTotals {
 export interface DetailedLineItem {
   product_name: string;
   planned_quantity: number;
-  base_cost_cop: string;
-  base_cost_total: string;
   bom_items: BOMItem[];
-  additional_costs: AdditionalCost[];
   totals: ProductTotals;
 }
 

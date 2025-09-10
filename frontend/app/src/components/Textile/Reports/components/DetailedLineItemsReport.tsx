@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography, Chip } from '@mui/material';
 import { formatCOP } from '@/utils/currency';
 import { designTokens } from '@/config';
-import { ReportComponentProps, DetailedLineItem, BOMItem, AdditionalCost } from '../utils/reportTypes';
+import { ReportComponentProps, DetailedLineItem, BOMItem } from '../utils/reportTypes';
 import { pdfStyles } from '../styles/reportStyles';
 import ReportHeader from './ReportHeader';
 
@@ -118,75 +118,6 @@ const DetailedLineItemsReport: React.FC<ReportComponentProps> = ({
     );
   };
 
-  const renderAdditionalCostsTable = (additionalCosts: AdditionalCost[], isPrint: boolean = false) => {
-    if (!additionalCosts || additionalCosts.length === 0) return null;
-
-    const tableStyles = isPrint ? pdfStyles.additionalCostsTable : {
-      width: '100%',
-      borderCollapse: 'collapse' as const,
-      marginBottom: '16px',
-    };
-
-    const headerStyles = isPrint ? pdfStyles.additionalCostsHeader : {
-      textAlign: 'left' as const,
-      padding: '8px',
-      borderBottom: `1px solid ${designTokens.colors.border.light}`,
-      fontWeight: 600,
-      fontSize: '0.75rem',
-      backgroundColor: designTokens.colors.warning[100],
-    };
-
-    const headerRightStyles = isPrint ? { ...pdfStyles.additionalCostsHeader, textAlign: 'right' as const } : {
-      textAlign: 'right' as const,
-      padding: '8px',
-      borderBottom: `1px solid ${designTokens.colors.border.light}`,
-      fontWeight: 600,
-      fontSize: '0.75rem',
-      backgroundColor: designTokens.colors.warning[100],
-    };
-
-    const cellStyles = isPrint ? pdfStyles.tableCell : {
-      padding: '8px',
-      borderBottom: `1px solid ${designTokens.colors.border.light}`,
-      fontSize: '0.75rem',
-    };
-
-    const cellRightStyles = isPrint ? pdfStyles.tableCellRight : {
-      textAlign: 'right' as const,
-      padding: '8px',
-      borderBottom: `1px solid ${designTokens.colors.border.light}`,
-      fontSize: '0.75rem',
-    };
-
-    const cellBoldStyles = isPrint ? pdfStyles.tableCellBold : {
-      textAlign: 'right' as const,
-      padding: '8px',
-      borderBottom: `1px solid ${designTokens.colors.border.light}`,
-      fontSize: '0.75rem',
-      fontWeight: 600,
-    };
-
-    return (
-      <table style={tableStyles}>
-        <thead>
-          <tr>
-            <th style={headerStyles}>Concepto</th>
-            <th style={headerRightStyles}>Costo Unitario</th>
-            <th style={headerRightStyles}>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {additionalCosts.map((cost: AdditionalCost, costIndex: number) => (
-            <tr key={costIndex}>
-              <td style={cellStyles}>{cost.name}</td>
-              <td style={cellRightStyles}>{formatCOP(cost.unit_cost_cop)}</td>
-              <td style={cellBoldStyles}>{formatCOP(cost.total_for_quantity)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    );
-  };
 
   const renderProductTotals = (product: DetailedLineItem, isPrint: boolean = false) => {
     if (!product.totals) return null;
@@ -197,13 +128,7 @@ const DetailedLineItemsReport: React.FC<ReportComponentProps> = ({
           <div style={pdfStyles.totalsSummaryTitle}>Resumen de Totales</div>
           <div style={pdfStyles.totalsGrid}>
             <div style={pdfStyles.totalItem}>
-              Base: <strong>{formatCOP(product.totals.base_total)}</strong>
-            </div>
-            <div style={pdfStyles.totalItem}>
               BOM: <strong>{formatCOP(product.totals.bom_total)}</strong>
-            </div>
-            <div style={pdfStyles.totalItem}>
-              Adicionales: <strong>{formatCOP(product.totals.additional_total)}</strong>
             </div>
             <div style={{...pdfStyles.totalItem, color: '#2e7d32'}}>
               Total: <strong>{formatCOP(product.totals.product_total)}</strong>
@@ -225,13 +150,7 @@ const DetailedLineItemsReport: React.FC<ReportComponentProps> = ({
         </Typography>
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 1 }}>
           <Typography variant="body2">
-            Base: <strong>{formatCOP(product.totals.base_total)}</strong>
-          </Typography>
-          <Typography variant="body2">
             BOM: <strong>{formatCOP(product.totals.bom_total)}</strong>
-          </Typography>
-          <Typography variant="body2">
-            Adicionales: <strong>{formatCOP(product.totals.additional_total)}</strong>
           </Typography>
           <Typography variant="body2" sx={{ color: designTokens.colors.success[700] }}>
             Total: <strong>{formatCOP(product.totals.product_total)}</strong>
@@ -255,7 +174,7 @@ const DetailedLineItemsReport: React.FC<ReportComponentProps> = ({
             <div style={pdfStyles.productHeader}>
               <div style={pdfStyles.productName}>{product.product_name}</div>
               <div style={pdfStyles.productDetails}>
-                Cantidad: {product.planned_quantity} | Base: {formatCOP(product.base_cost_cop)} | 
+                Cantidad: {product.planned_quantity} | 
                 Total Producto: {formatCOP(product.totals?.product_total)} | 
                 Costo Unitario: {formatCOP(product.totals?.unit_cost)}
               </div>
@@ -268,12 +187,6 @@ const DetailedLineItemsReport: React.FC<ReportComponentProps> = ({
               </div>
             )}
 
-            {product.additional_costs && product.additional_costs.length > 0 && (
-              <div>
-                <div style={pdfStyles.sectionHeader}>Costos Adicionales</div>
-                {renderAdditionalCostsTable(product.additional_costs, true)}
-              </div>
-            )}
 
             {renderProductTotals(product, true)}
           </div>
@@ -308,7 +221,7 @@ const DetailedLineItemsReport: React.FC<ReportComponentProps> = ({
                 {product.product_name}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Cantidad: {product.planned_quantity} | Base: {formatCOP(product.base_cost_cop)} | 
+                Cantidad: {product.planned_quantity} | 
                 Total Producto: {formatCOP(product.totals?.product_total)} | 
                 Costo Unitario: {formatCOP(product.totals?.unit_cost)}
               </Typography>
@@ -323,14 +236,6 @@ const DetailedLineItemsReport: React.FC<ReportComponentProps> = ({
               </Box>
             )}
 
-            {product.additional_costs && product.additional_costs.length > 0 && (
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="subtitle2" fontWeight="semibold" sx={{ mb: 1 }}>
-                  Costos Adicionales
-                </Typography>
-                {renderAdditionalCostsTable(product.additional_costs, false)}
-              </Box>
-            )}
 
             {renderProductTotals(product, false)}
           </Box>
