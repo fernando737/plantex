@@ -7,7 +7,8 @@ services:
     volumes:
       - media-files:/app/media
     command: >
-      sh -c "python manage.py migrate_schemas --shared &&
+      sh -c "python manage.py wait_for_db &&
+              python manage.py migrate_schemas --shared &&
               python manage.py create_public_tenant &&
               python manage.py loaddata ./fixtures/initial_units.json &&
               daphne -b 0.0.0.0 -p 8000 app.asgi:application"
@@ -15,10 +16,16 @@ services:
       - ./.env
       - ./backend/.env
     depends_on:
-      - db
+      - db:
+        condition: service_healthy
 
   db:
     image: postgres:13-alpine
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     volumes:
       - prod-db-data:/var/lib/postgresql/data
     env_file:

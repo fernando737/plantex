@@ -16,6 +16,11 @@ textile_urlpatterns = [
     path('providers/', views.ProviderViewSet.as_view({'get': 'list', 'post': 'create'}), name='provider-list'),
     path('providers/<int:pk>/', views.ProviderViewSet.as_view({'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}), name='provider-detail'),
     
+    # Provider CSV operations
+    path('providers/import-csv/', views.ProviderViewSet.as_view({'post': 'import_csv'}), name='provider-import-csv'),
+    path('providers/export-csv/', views.ProviderViewSet.as_view({'get': 'export_csv'}), name='provider-export-csv'),
+    path('providers/csv-template/', views.ProviderViewSet.as_view({'get': 'csv_template'}), name='provider-csv-template'),
+    
     # Inputs
     path('inputs/', views.InputViewSet.as_view({'get': 'list', 'post': 'create'}), name='input-list'),
     path('inputs/<int:pk>/', views.InputViewSet.as_view({'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}), name='input-detail'),

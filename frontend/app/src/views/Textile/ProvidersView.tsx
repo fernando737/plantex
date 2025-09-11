@@ -7,17 +7,26 @@ import {
   Paper,
   IconButton,
   Tooltip,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
 } from '@mui/material';
 import {
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
   Business as BusinessIcon,
+  MoreVert as MoreVertIcon,
+  Upload as UploadIcon,
+  Download as DownloadIcon,
+  GetApp as TemplateIcon,
 } from '@mui/icons-material';
-import { useProviders } from '@/hooks/textile/useTextileApi';
-import { Provider } from '@/types/textile';
+import { useProviders, useProviderCSVOperations } from '@/hooks/textile/useTextileApi';
+import { Provider, CSVImportResponse, CSVImportOptions } from '@/types/textile';
 import DataTableSimple from '@/components/Common/DataTableSimple';
 import ConfirmationDialog from '@/components/Common/ConfirmationDialog';
+import CSVImportModal from '@/components/Textile/CSVImportModal';
 import { designTokens } from '@/config';
 import toast from 'react-hot-toast';
 
@@ -32,10 +41,20 @@ const ProvidersView: React.FC<ProvidersViewProps> = ({
 }) => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [providerToDelete, setProviderToDelete] = useState<Provider | null>(null);
+  const [csvImportOpen, setCsvImportOpen] = useState(false);
+  const [csvMenuAnchor, setCsvMenuAnchor] = useState<null | HTMLElement>(null);
+  const [importResult, setImportResult] = useState<CSVImportResponse | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
 
   const providerHooks = useProviders();
-  const { data: providersResponse, isLoading } = providerHooks.useList();
+  const { data: providersResponse, isLoading, refetch } = providerHooks.useList();
   const deleteProvider = providerHooks.useDelete(providerToDelete?.id || 0);
+  
+  // CSV Operations
+  const csvOperations = useProviderCSVOperations();
+  const importCSV = csvOperations.useImportCSV();
+  const exportCSV = csvOperations.useExportCSV();
+  const downloadTemplate = csvOperations.useDownloadTemplate();
 
   const providers = providersResponse?.results || [];
 
@@ -61,6 +80,81 @@ const ProvidersView: React.FC<ProvidersViewProps> = ({
   const handleDeleteCancel = () => {
     setDeleteConfirmOpen(false);
     setProviderToDelete(null);
+  };
+
+  // CSV Menu Handlers
+  const handleCsvMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setCsvMenuAnchor(event.currentTarget);
+  };
+
+  const handleCsvMenuClose = () => {
+    setCsvMenuAnchor(null);
+  };
+
+  // CSV Import Handlers
+  const handleImportCSV = async (file: File, options: CSVImportOptions) => {
+    try {
+      setImportError(null);
+      const result = await importCSV.mutateAsync({ file, options });
+      setImportResult(result);
+      
+      if (!result.validate_only && result.error_count === 0) {
+        toast.success(`✓ ${result.imported_count} proveedores importados exitosamente`);
+        refetch(); // Refresh the providers list
+        setTimeout(() => {
+          setCsvImportOpen(false);
+          setImportResult(null);
+        }, 2000);
+      } else if (result.validate_only && result.error_count === 0) {
+        toast.success(`✓ Validación exitosa - ${result.imported_count} registros listos para importar`);
+      } else if (result.error_count > 0) {
+        toast.warning(`Importación completada con ${result.error_count} errores`);
+        if (!result.validate_only) {
+          refetch();
+        }
+      }
+    } catch (error: any) {
+      console.error('CSV import error:', error);
+      const errorMessage = error.response?.data?.error || 'Error al importar el archivo CSV';
+      setImportError(errorMessage);
+      toast.error(errorMessage);
+    }
+  };
+
+  const handleOpenImportModal = () => {
+    setImportResult(null);
+    setImportError(null);
+    setCsvImportOpen(true);
+    handleCsvMenuClose();
+  };
+
+  const handleCloseImportModal = () => {
+    setCsvImportOpen(false);
+    setImportResult(null);
+    setImportError(null);
+  };
+
+  // CSV Export Handlers
+  const handleExportCSV = async () => {
+    try {
+      await exportCSV.mutateAsync();
+      toast.success('Archivo CSV exportado exitosamente');
+    } catch (error: any) {
+      console.error('CSV export error:', error);
+      toast.error('Error al exportar el archivo CSV');
+    }
+    handleCsvMenuClose();
+  };
+
+  const handleDownloadTemplate = async () => {
+    try {
+      await downloadTemplate.mutateAsync();
+      toast.success('Plantilla CSV descargada');
+    } catch (error: any) {
+      console.error('Template download error:', error);
+      toast.error('Error al descargar la plantilla');
+    }
+    handleCsvMenuClose();
   };
 
   const columns = [
@@ -160,17 +254,30 @@ const ProvidersView: React.FC<ProvidersViewProps> = ({
               Gestiona los proveedores de materiales e insumos
             </Typography>
           </Box>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={onCreateProvider}
-            sx={{
-              borderRadius: designTokens.borderRadius.md,
-              px: 3,
-            }}
-          >
-            Nuevo Proveedor
-          </Button>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              variant="outlined"
+              startIcon={<MoreVertIcon />}
+              onClick={handleCsvMenuOpen}
+              sx={{
+                borderRadius: designTokens.borderRadius.md,
+                px: 2,
+              }}
+            >
+              CSV
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={onCreateProvider}
+              sx={{
+                borderRadius: designTokens.borderRadius.md,
+                px: 3,
+              }}
+            >
+              Nuevo Proveedor
+            </Button>
+          </Box>
         </Box>
 
         {/* Providers Table */}
@@ -197,6 +304,59 @@ const ProvidersView: React.FC<ProvidersViewProps> = ({
           onCancel={handleDeleteCancel}
           severity="error"
           loading={deleteProvider.isPending}
+        />
+
+        {/* CSV Operations Menu */}
+        <Menu
+          anchorEl={csvMenuAnchor}
+          open={Boolean(csvMenuAnchor)}
+          onClose={handleCsvMenuClose}
+          PaperProps={{
+            sx: {
+              borderRadius: designTokens.borderRadius.md,
+              mt: 1,
+            }
+          }}
+        >
+          <MenuItem onClick={handleOpenImportModal}>
+            <ListItemIcon>
+              <UploadIcon />
+            </ListItemIcon>
+            <ListItemText primary="Importar CSV" />
+          </MenuItem>
+          
+          <MenuItem 
+            onClick={handleExportCSV}
+            disabled={exportCSV.isPending}
+          >
+            <ListItemIcon>
+              <DownloadIcon />
+            </ListItemIcon>
+            <ListItemText primary="Exportar CSV" />
+          </MenuItem>
+          
+          <MenuItem 
+            onClick={handleDownloadTemplate}
+            disabled={downloadTemplate.isPending}
+          >
+            <ListItemIcon>
+              <TemplateIcon />
+            </ListItemIcon>
+            <ListItemText primary="Descargar Plantilla" />
+          </MenuItem>
+        </Menu>
+
+        {/* CSV Import Modal */}
+        <CSVImportModal
+          open={csvImportOpen}
+          onClose={handleCloseImportModal}
+          onImport={handleImportCSV}
+          onDownloadTemplate={handleDownloadTemplate}
+          isImporting={importCSV.isPending}
+          importResult={importResult}
+          importError={importError}
+          title="Importar Proveedores desde CSV"
+          description="Sube un archivo CSV con los datos de los proveedores para importar al sistema."
         />
       </Box>
     </Container>
