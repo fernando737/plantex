@@ -35,7 +35,8 @@
     "react-error-boundary": "^4.0.12",
     "react-hot-toast": "^2.4.1",
     "jspdf": "^2.5.1",
-    "html2canvas": "^1.4.1"
+    "html2canvas": "^1.4.1",
+    "react-dropzone": "^14.2.3"
   },
   "devDependencies": {
     "@types/react": "^18.2.45",

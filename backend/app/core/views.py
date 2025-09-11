@@ -5,10 +5,13 @@ Includes existing health/info endpoints and new textile ViewSets.
 """
 
 from django.utils import timezone
+from django.http import HttpResponse
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
 from core.utils.error_handling import ErrorResponseBuilder
+from .utils.csv_operations import ProviderCSVImporter, ProviderCSVExporter, CSVImportError, CSVExportError
 
 from .textile_models import (
     Unit,
@@ -75,6 +78,127 @@ class ProviderViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         return Provider.objects.all()
+    
+    @action(detail=False, methods=['post'], parser_classes=[MultiPartParser, FormParser])
+    def import_csv(self, request):
+        """
+        Import providers from CSV file
+        """
+        try:
+            # Get uploaded file
+            if 'file' not in request.FILES:
+                return Response(
+                    {'error': 'No file provided'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            file = request.FILES['file']
+            
+            # Validate file type
+            if not file.name.endswith('.csv'):
+                return Response(
+                    {'error': 'File must be a CSV file'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Get import options
+            validate_only = request.data.get('validate_only', 'false').lower() == 'true'
+            skip_duplicates = request.data.get('skip_duplicates', 'true').lower() == 'true'
+            continue_on_error = request.data.get('continue_on_error', 'true').lower() == 'true'
+            
+            # Read file content
+            file_content = file.read().decode('utf-8')
+            
+            # Import CSV
+            importer = ProviderCSVImporter()
+            result = importer.import_csv(
+                file_content=file_content,
+                validate_only=validate_only,
+                skip_duplicates=skip_duplicates,
+                continue_on_error=continue_on_error
+            )
+            
+            return Response(result, status=status.HTTP_200_OK)
+            
+        except CSVImportError as e:
+            return Response(
+                {
+                    'error': str(e),
+                    'line_number': getattr(e, 'line_number', None),
+                    'errors': getattr(e, 'errors', [])
+                }, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'Import failed: {str(e)}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=False, methods=['get'])
+    def export_csv(self, request):
+        """
+        Export providers to CSV file
+        """
+        try:
+            # Get export filters from query parameters
+            filters = {}
+            
+            # Date range filters
+            if request.query_params.get('created_after'):
+                filters['created_after'] = request.query_params['created_after']
+            if request.query_params.get('created_before'):
+                filters['created_before'] = request.query_params['created_before']
+            
+            # Name filter
+            if request.query_params.get('name_contains'):
+                filters['name_contains'] = request.query_params['name_contains']
+            
+            # Has email filter
+            if request.query_params.get('has_email'):
+                filters['has_email'] = request.query_params.get('has_email').lower() == 'true'
+            
+            # Export CSV
+            exporter = ProviderCSVExporter()
+            csv_content = exporter.export_csv(**filters)
+            
+            # Create response
+            response = HttpResponse(csv_content, content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="proveedores.csv"'
+            
+            return response
+            
+        except CSVExportError as e:
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'Export failed: {str(e)}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=False, methods=['get'])
+    def csv_template(self, request):
+        """
+        Download CSV template for importing providers
+        """
+        try:
+            exporter = ProviderCSVExporter()
+            template_content = exporter.generate_import_template()
+            
+            # Create response
+            response = HttpResponse(template_content, content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="plantilla_proveedores.csv"'
+            
+            return response
+            
+        except Exception as e:
+            return Response(
+                {'error': f'Failed to generate template: {str(e)}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class InputViewSet(viewsets.ModelViewSet):

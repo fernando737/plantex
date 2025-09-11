@@ -198,3 +198,25 @@ export interface CostRecalculationResponse {
   updated_count: number;
   total_cost: string;
 }
+
+// CSV Import/Export types
+export interface CSVImportResponse {
+  imported_count: number;
+  skipped_count: number;
+  error_count: number;
+  errors: string[];
+  validate_only: boolean;
+}
+
+export interface CSVImportOptions {
+  validate_only?: boolean;
+  skip_duplicates?: boolean;
+  continue_on_error?: boolean;
+}
+
+export interface CSVExportOptions {
+  created_after?: string;
+  created_before?: string;
+  name_contains?: string;
+  has_email?: boolean;
+}
